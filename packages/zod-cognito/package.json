@@ -1,7 +1,7 @@
 {
   "name": "zod-cognito",
   "description": "Zod schemas for AWS Cognito User Pools",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "dist/index.js",
   "repository": {
     "type": "git",
@@ -25,7 +25,6 @@
   "scripts": {
     "watch": "tsc -w",
     "build": "tsc",
-    "publish": "npm publish",
     "test": "jest"
   },
   "dependencies": {

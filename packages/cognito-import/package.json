@@ -22,7 +22,6 @@
   "scripts": {
     "start": "tsc && node dist/index.js",
     "build": "tsc",
-    "publish": "npm publish",
     "test": "jest --passWithNoTests"
   },
   "dependencies": {

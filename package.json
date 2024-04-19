@@ -5,7 +5,7 @@
   "scripts": {
     "start": "npm run start --w packages/*",
     "build": "npm run build --workspaces",
-    "publish-all": "npm run publish --workspaces",
+    "publish-all": "npm publish --workspaces",
     "test": "npm run test --w packages/*"
   },
   "workspaces": [

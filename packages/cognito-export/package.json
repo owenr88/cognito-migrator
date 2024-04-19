@@ -22,7 +22,6 @@
   "scripts": {
     "start": "tsc -w",
     "build": "tsc",
-    "publish": "npm publish",
     "test": "jest --passWithNoTests"
   },
   "dependencies": {
