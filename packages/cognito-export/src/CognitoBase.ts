@@ -34,6 +34,9 @@ class CognitoBase {
     if (process.env.AWS_REGION === undefined) {
       process.env.AWS_REGION = "eu-west-1";
     }
+
+    this.log("Using profile: " + process.env.AWS_PROFILE);
+    this.log("Using region: " + process.env.AWS_REGION);
   }
 
   protected log(
