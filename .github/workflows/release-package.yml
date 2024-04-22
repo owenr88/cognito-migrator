@@ -32,6 +32,7 @@ jobs:
       - run: git tag -fa $GITHUB_REF_NAME
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
+          commit_message: "chore: release $GITHUB_REF_NAME"
           branch: main
       - run: npm run publish-all
         env:
