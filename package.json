@@ -9,7 +9,9 @@
     "test": "npm run test --w packages/*"
   },
   "workspaces": [
-    "./packages/*"
+    "./packages/zod-cognito",
+    "./packages/cognito-export",
+    "./packages/cognito-import"
   ],
   "author": "",
   "license": "ISC",
