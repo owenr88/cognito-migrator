@@ -31,9 +31,7 @@ export class CognitoExport extends CognitoBase {
           if (users.length >= limit) return false;
 
           // Map the attributes to a key-value object
-          console.log(user.Attributes);
           const attrbs = parseUserAttributes(user.Attributes);
-          console.log(attrbs);
 
           // Return if some core data isn't there
           if (!user.Username) {

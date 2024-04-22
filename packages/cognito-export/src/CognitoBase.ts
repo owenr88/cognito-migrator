@@ -45,7 +45,7 @@ class CognitoBase {
   ) {
     if (!this.verbose) return;
     if (type === "success") {
-      return console.log(chalk.green(val));
+      return console.log(chalk.bgGreen(val));
     }
     if (type === "error") {
       return console.log(chalk.bold.red(val));
@@ -53,7 +53,7 @@ class CognitoBase {
     if (type === "warn") {
       return console.log(chalk.hex("#FFA500")(val));
     }
-    return console.log(chalk.blue(val));
+    return console.log(chalk.hex("30D5C8")(val));
   }
 
   public async connect() {
