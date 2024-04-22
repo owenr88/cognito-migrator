@@ -30,10 +30,9 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm pkg set version=$GITHUB_REF_NAME --workspaces
-      # - run: git tag -fa $GITHUB_REF_NAME
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: release ${{ $GITHUB_REF_NAME }}"
+          commit_message: "chore: tag and release"
           branch: main
       - run: npm run publish-all
         env:
