@@ -28,6 +28,7 @@ jobs:
           node-version: 18
           registry-url: https://registry.npmjs.org/
       - run: npm ci
+      - run: npm run build
       - run: npm pkg set version=$GITHUB_REF_NAME --workspaces
       # - run: git tag -fa $GITHUB_REF_NAME
       - uses: stefanzweifel/git-auto-commit-action@v5
