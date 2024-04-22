@@ -17,9 +17,6 @@
     "export",
     "migrate"
   ],
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "start": "tsc -w",
     "build": "tsc",
