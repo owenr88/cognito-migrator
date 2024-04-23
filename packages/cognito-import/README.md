@@ -34,7 +34,6 @@ A full example of the CLI tool in effect can be found below:
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | -u, --user-pool-id <user-pool-id> | The ID of the AWS Cognito user pool to import into                                                                                                     |
 | -p, --profile PROFILEA            | The AWS profile to use for authentication. This will default to the AWS_PROFILE environment variable if left blank, or `default` if that is undefined. |
-| -r, --region eu-west-1            | The AWS region of the User Pool. This will default to the AWS_REGION environment variable if left blank, or `eu-west-1` if that is undefined.          |
 | -f, --file ./users.csv            | The path to the CSV file to import. Defaults to `./users.csv`.                                                                                         |
 | -v, --verbose                     | Show all logs and errors in the console. Defaults to `true`.                                                                                           |
 | -h, --help                        | See all flags and options                                                                                                                              |
@@ -51,7 +50,6 @@ const users: ImportUsers = []; // Get your users ready
 await cognitoImport(users, {
   userPoolId: "eu-west-1_aaaaaaaaa",
   profile: "SOMEPROFILE",
-  region: "eu-west-1",
 });
 ```
 

@@ -4,7 +4,6 @@ import chalk from "chalk";
 
 type CognitoExportProps = {
   userPoolId: string;
-  region?: string;
   profile?: string;
   verbose?: boolean;
   iamArn?: string;
@@ -32,9 +31,7 @@ class CognitoBase {
       process.env.AWS_PROFILE = "default";
     }
 
-    if (options.region !== undefined) {
-      process.env.AWS_REGION = options.region;
-    }
+    process.env.AWS_REGION = options.userPoolId.split("_")[0];
     if (process.env.AWS_REGION === undefined) {
       process.env.AWS_REGION = "eu-west-1";
     }

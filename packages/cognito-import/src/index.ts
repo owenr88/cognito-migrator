@@ -3,7 +3,6 @@ import { CognitoImport } from "./importer";
 
 export type ImportCognitoOptions = {
   userPoolId: string;
-  region?: string;
   profile?: string;
   verbose?: boolean;
   limit?: number;

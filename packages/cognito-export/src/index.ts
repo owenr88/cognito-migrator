@@ -2,7 +2,6 @@ import { CognitoExport } from "./exporter";
 
 export type ExportCognitoOptions = {
   userPoolId: string;
-  region?: string;
   profile?: string;
   verbose?: boolean;
   limit?: number;

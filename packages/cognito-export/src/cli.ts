@@ -6,7 +6,6 @@ import { CognitoExport } from "./exporter";
 
 export type Options = {
   userPoolId: string;
-  region: string;
   profile: string;
   verbose: boolean;
   limit: string;
@@ -17,7 +16,6 @@ const main = async () => {
   program
     .requiredOption("-u, --user-pool-id <user-pool-id>", "User Pool ID")
     .option("-p, --profile <profile>", "AWS Profile", undefined)
-    .option("-r, --region <region>", "AWS Region", undefined)
     .option(
       "-o, --output <output>",
       "The file location to output the users to",
@@ -31,7 +29,6 @@ const main = async () => {
         const exporter = new CognitoExport({
           userPoolId: options.userPoolId,
           profile: options.profile,
-          region: options.region,
           verbose: options.verbose,
         });
         await exporter.connect();

@@ -23,12 +23,11 @@ export class CognitoImport extends CognitoBase {
 
       // Verify the contents
       const users = ImportSchema.parse(rawUsers);
-      console.log(users);
 
       // Import the users
-      // return this.import(users);
+      return this.import(users);
     } catch (e: any) {
-      // this.log(e?.message, "error");
+      this.log(e?.message, "error");
     }
   }
 
@@ -40,7 +39,7 @@ export class CognitoImport extends CognitoBase {
     // Create the job
     const job = await this.cognito?.createUserImportJob({
       UserPoolId: this.userPoolId,
-      JobName: `import-${new Date().getTime()}`,
+      JobName: `cognito-import-${new Date().getTime()}`,
       CloudWatchLogsRoleArn: this.iamArn,
     });
 
@@ -49,16 +48,23 @@ export class CognitoImport extends CognitoBase {
       this.log("Error creating the import job", "error");
       return;
     }
-    this.log("Created an empty import job");
+    this.log("Created an empty import job: " + job.UserImportJob.JobId);
 
     // Upload the file
-    await fetch(job?.UserImportJob?.PreSignedUrl ?? "", {
+    const res = await fetch(job?.UserImportJob?.PreSignedUrl ?? "", {
       method: "PUT",
       body: Papa.unparse(users, {
         header: true,
         quotes: false,
       }),
+      headers: {
+        "x-amz-server-side-encryption": "aws:kms",
+      },
     });
+    if (res.status !== 200) {
+      this.log("Error uploading the user data", "error");
+      throw new Error(res.statusText);
+    }
     this.log("Uploaded user data to the import job");
 
     // Startthe job

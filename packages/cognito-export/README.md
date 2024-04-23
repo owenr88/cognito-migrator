@@ -36,7 +36,6 @@ A full example of the CLI tool in effect can be found below:
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | -u, --user-pool-id <user-pool-id> | The ID of the AWS Cognito user pool to export from                                                                                                     |
 | -p, --profile PROFILEA            | The AWS profile to use for authentication. This will default to the AWS_PROFILE environment variable if left blank, or `default` if that is undefined. |
-| -r, --region eu-west-1            | The AWS region of the User Pool. This will default to the AWS_REGION environment variable if left blank, or `eu-west-1` if that is undefined.          |
 | -o, --output ./users.csv          | The path to the output CSV file. Defaults to `./users.csv`.                                                                                            |
 | -l, --limit 1000                  | Limit the number of users outputted. Defaults to `1000`.                                                                                               |
 | -v, --verbose                     | Show all logs and errors in the console. Defaults to `true`.                                                                                           |
@@ -52,7 +51,6 @@ import cognitoExport from "cognito-export";
 const users = await cognitoExport({
   userPoolId: "eu-west-1_aaaaaaaaa",
   profile: "SOMEPROFILE",
-  region: "eu-west-1",
 });
 ```
 

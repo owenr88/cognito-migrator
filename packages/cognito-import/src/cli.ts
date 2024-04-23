@@ -9,7 +9,6 @@ import { CognitoImport } from "./importer";
 export type Options = {
   userPoolId: string;
   profile?: string;
-  region?: string;
   file: string;
   iam?: string;
   verbose?: boolean;
@@ -19,7 +18,6 @@ const main = async () => {
   program
     .requiredOption("-u, --user-pool-id <user-pool-id>", "User Pool ID")
     .option("-p, --profile <profile>", "AWS Profile", undefined)
-    .option("-r, --region <region>", "AWS Region", undefined)
     .requiredOption(
       "-f, --file <file>",
       "The file location to import the users from",
@@ -39,7 +37,6 @@ const main = async () => {
         const importer = new CognitoImport({
           userPoolId: options.userPoolId,
           profile: options.profile,
-          region: options.region,
           verbose: options.verbose,
           iamArn: options.iam,
         });
