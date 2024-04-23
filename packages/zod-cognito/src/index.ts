@@ -63,6 +63,15 @@ export const parseUserAttributes = <
 };
 
 /**
+ * A default string transformer
+ */
+const zDefaultString = z
+  .string()
+  .min(0)
+  .nullish()
+  .transform((s) => s ?? "");
+
+/**
  * The attributes that can be imported into Cognito
  */
 const ImportAttributes = z
@@ -72,35 +81,29 @@ const ImportAttributes = z
     "cognito:mfa_enabled": z.boolean(),
 
     // Optional
-    name: z.string().min(0),
-    given_name: z.string().min(0),
-    family_name: z.string().min(0),
-    middle_name: z.string().min(0),
-    nickname: z.string().min(0),
-    preferred_username: z.string().min(0),
-    profile: z.string().min(0),
-    picture: z.string().min(0),
-    website: z.string().min(0),
-    gender: z.string().min(0),
-    birthdate: z
-      .string()
-      .min(0)
-      .transform((d) => {
-        if (!d) return d;
-        if (!isValid(d)) return "";
-        return format(new Date(d), "mm/dd/yyyy");
-      }),
-    zoneinfo: z.string().min(0),
-    locale: z.string().min(0),
-    address: z.string().min(0),
+    name: zDefaultString,
+    given_name: zDefaultString,
+    family_name: zDefaultString,
+    middle_name: zDefaultString,
+    nickname: zDefaultString,
+    preferred_username: zDefaultString,
+    profile: zDefaultString,
+    picture: zDefaultString,
+    website: zDefaultString,
+    gender: zDefaultString,
+    birthdate: zDefaultString.transform((d) => {
+      if (!d) return d;
+      if (!isValid(d)) return "";
+      return format(new Date(d), "mm/dd/yyyy");
+    }),
+    zoneinfo: zDefaultString,
+    locale: zDefaultString,
+    address: zDefaultString,
     updated_at: z.coerce.date().transform(getUnixTime),
     email_verified: z.boolean(),
-    email: z.string().min(0),
+    email: zDefaultString,
     phone_number_verified: z.boolean(),
-    phone_number: z
-      .string()
-      .min(0)
-      .transform((v) => (v ? parseInt(v) : "")),
+    phone_number: zDefaultString.transform((v) => (v ? parseInt(v) : "")),
   })
   .refine((schema) => {
     if (!schema.email_verified && !schema.phone_number_verified) {
@@ -142,7 +145,13 @@ export const ImportSchema = z
     return records.map((record) => {
       return Object.entries(record).reduce(
         (acc, [key, value]) => {
-          return { ...acc, [key]: value.toString().replace(/,/g, "\\,") };
+          if (typeof value !== "string") {
+            return {
+              ...acc,
+              [key]: value,
+            };
+          }
+          return { ...acc, [key]: value?.toString().replace(/,/g, "\\,") };
         },
         {} as typeof record
       );

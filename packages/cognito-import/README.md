@@ -61,7 +61,7 @@ await cognitoImport(users, {
 
 ```bash
 npx cognito-export -u eu-west-1_aaaaaaaaa -p PROFILE_A &&
-npx cognito-import -u eu-west-1_bbbbbbbbb -p PROFILE_B -j import-12345 -f users.csv
+npx cognito-import -u eu-west-1_bbbbbbbbb -p PROFILE_B -f users.csv
 ```
 
 or

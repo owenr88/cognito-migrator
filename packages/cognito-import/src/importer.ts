@@ -15,14 +15,20 @@ export class CognitoImport extends CognitoBase {
 
       // Read the file
       const contents = fs.readFileSync(location, "utf8");
+      const rawUsers = Papa.parse(contents, {
+        header: true,
+        skipEmptyLines: true,
+        dynamicTyping: true,
+      }).data;
 
       // Verify the contents
-      const users = ImportSchema.parse(Papa.parse(contents).data);
+      const users = ImportSchema.parse(rawUsers);
+      console.log(users);
 
       // Import the users
-      return this.import(users);
+      // return this.import(users);
     } catch (e: any) {
-      this.log(e?.message, "error");
+      // this.log(e?.message, "error");
     }
   }
 
