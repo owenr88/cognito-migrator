@@ -1,8 +1,8 @@
-# zod-cognito
+# Zod Cognito
 
 This package includes a few useful Zod Schemas for AWS Cognito. It includes schemas for importing and exporting, as well as parsing user attributes.
 
-> Please check out the other packages, [cognito-export]() and [cognito-import]() for... exporting and importing.
+> Please check out the other packages, [https://www.npmjs.com/package/cognito-export]() and [https://www.npmjs.com/package/cognito-import]() for... exporting and importing.
 
 ## Getting started
 
@@ -32,7 +32,7 @@ const customRecord = CustomRecordSchema.parse(user);
 const customRecords = z.array(CustomRecordSchema).parse(users);
 ```
 
-> Please check out [cognito-import] for importing users, which automatically has this schema verification built in.
+> Check out [https://www.npmjs.com/package/cognito-import] for importing users, which automatically has this schema verification built in.
 
 ### 2. Parsing UserAttributes
 

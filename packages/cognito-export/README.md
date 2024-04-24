@@ -56,7 +56,7 @@ const users = await cognitoExport({
 
 > Please note: This method supports all flags documented above, **except** the output and verbose flags. Instead, the method just returns the user records to store somewhere.
 
-## Use with [cognito-import](../cognito-import/)
+## Use with [cognito-import](https://www.npmjs.com/package/cognito-import)
 
 ```bash
 npx cognito-export -u eu-west-1_aaaaaaaaa -p PROFILE_A &&

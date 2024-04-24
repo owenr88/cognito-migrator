@@ -1,4 +1,4 @@
-# Cognito Import
+# Cognito Import
 
 A simple CLI tool and JavaScript package for importing users into an AWS Cognito user pool.
 
@@ -8,7 +8,7 @@ A simple CLI tool and JavaScript package for importing users into an AWS Cognito
 
 1. Use it as a CLI tool to import users from a CSV file into a user pool
 
-`npx cognito-import -u <user-pool-id> -l`
+`npx cognito-import -u <user-pool-id> -f ./users.csv -v`
 
 2. or, use it in Node.js
 
@@ -55,7 +55,7 @@ await cognitoImport(users, {
 
 > Please note: This method supports all flags documented above, **except** the file and verbose flags. Instead, the method expects the users to be passed in.
 
-## Use with [cognito-export](../cognito-export/)
+## Use with [cognito-export](https://www.npmjs.com/package/cognito-export)
 
 ```bash
 npx cognito-export -u eu-west-1_aaaaaaaaa -p PROFILE_A &&
