@@ -29,11 +29,6 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - run: npm ci
       - run: npm run build
-      - run: npm pkg set version=$GITHUB_REF_NAME --workspaces
-      - uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: tag and release"
-          branch: main
       - run: npm run publish-all
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

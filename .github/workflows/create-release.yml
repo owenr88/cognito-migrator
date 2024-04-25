@@ -50,7 +50,7 @@ jobs:
       - name: Commit changes with the version
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: release ${{ $GITHUB_REF_NAME }}"
+          commit_message: "chore: tag and release"
           branch: main
 
       - name: Create Release
