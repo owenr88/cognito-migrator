@@ -37,7 +37,7 @@ jobs:
         env:
           BRANCH: ${{ github.ref_name }}
         id: split
-        run: echo "VERSION=${release##*/} >> "$GITHUB_OUTPUT"
+        run: echo "VERSION=${release##*/}" >> "$GITHUB_OUTPUT"
 
       - name: "Set version"
         env:
