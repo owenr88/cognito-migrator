@@ -8,6 +8,7 @@ on:
 
 jobs:
   build:
+    if: startsWith(github.head_ref, 'release/') &&  github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,6 +19,7 @@ jobs:
       - run: npm test
 
   create-release:
+    if: startsWith(github.head_ref, 'release/') &&  github.event.pull_request.merged == true
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -32,11 +34,26 @@ jobs:
 
       - run: npm ci
 
+      - name: Split branch name
+        env:
+          BRANCH: ${{ github.ref_name }}
+        id: split
+        run: echo "::set-output name=version::${release##*/}"
+
+      - run: npm pkg set version=${{ steps.split.outputs.fragment }} --workspaces
+
+      - name: Commit changes with the version
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: tag and release"
+          branch: main
+
       - name: Bump version and push tag
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: ${{ steps.split.outputs.fragment }}
 
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
@@ -45,26 +62,18 @@ jobs:
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
 
-      - run: npm pkg set version=$GITHUB_REF_NAME --workspaces
-
-      - name: Commit changes with the version
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: tag and release"
-          branch: main
-
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@latest
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-        with:
-          tag_name: $GITHUB_REF_NAME
-          release_name: $GITHUB_REF_NAME
-          # body: |
-          #   Changes in this Release
-          #   - First Change
-          #   - Second Change
-          draft: false
-          prerelease: false
+      # - name: Create Release
+      #   id: create_release
+      #   uses: actions/create-release@latest
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      #   with:
+      #     tag_name: $GITHUB_REF_NAME
+      #     release_name: $GITHUB_REF_NAME
+      #     # body: |
+      #     #   Changes in this Release
+      #     #   - First Change
+      #     #   - Second Change
+      #     draft: false
+      #     prerelease: false
       # - run: git tag -fa $GITHUB_REF_NAME
