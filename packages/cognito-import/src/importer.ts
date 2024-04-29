@@ -48,7 +48,7 @@ export class CognitoImport extends CognitoBase {
       this.log("Error creating the import job", "error");
       return;
     }
-    this.log("Created an empty import job: " + job.UserImportJob.JobId);
+    this.log("Created an empty import job: " + job.UserImportJob.JobName);
 
     // Upload the file
     const res = await fetch(job?.UserImportJob?.PreSignedUrl ?? "", {
@@ -61,7 +61,7 @@ export class CognitoImport extends CognitoBase {
         "x-amz-server-side-encryption": "aws:kms",
       },
     });
-    if (res.status !== 200) {
+    if (!res.ok) {
       this.log("Error uploading the user data", "error");
       throw new Error(res.statusText);
     }

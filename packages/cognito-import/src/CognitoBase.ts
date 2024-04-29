@@ -81,17 +81,16 @@ class CognitoBase {
           "error"
         );
       }
-
-      this.log("Found user pool");
+      this.log("Found user pool " + userPool.UserPool?.Name);
 
       // Create the iamArn if it doesn't exist
       if (!this.iamArn && !!userPool.UserPool?.Arn) {
-        this.log("No IAM Role ARN passed, creating one");
         // arn:aws:cognito-idp:eu-west-1:000000000000:userpool/eu-west-1_XXXXXXX
         const arn = userPool.UserPool?.Arn;
         const accountId = arn.split(":")[4];
-        await this.createIAMRole(parseInt(accountId));
-        this.log("Created IAM Role");
+        return this.createIAMRole(parseInt(accountId));
+      } else {
+        return this.log("Using IAM Role ARN: " + this.iamArn);
       }
     } catch (e: any) {
       this.log(e.message, "error");
@@ -101,11 +100,13 @@ class CognitoBase {
 
   private async createIAMRole(accountId: number) {
     if (this.iamArn) return;
+    this.log("No IAM Role ARN passed, creating one");
 
     // Create the role
     const iam = new IAM({
       region: process.env.AWS_REGION,
     });
+
     const role = await iam.createRole({
       AssumeRolePolicyDocument: JSON.stringify({
         Version: "2012-10-17",
@@ -119,44 +120,63 @@ class CognitoBase {
           },
         ],
       }),
+      Path: "/service-role/",
       MaxSessionDuration: 3600,
       RoleName: `cognito-import-${new Date().getTime()}`,
       Description: "Automated role for importing users into Cognito",
-      // PolicyDocument: JSON.stringify(policy),
     });
-    if (!role.Role?.RoleName) {
-      throw new Error("Role name not found");
+    if (!role.Role?.Arn) {
+      throw new Error("Role not created properly: No ARN");
     }
-    this.log("Created IAM Role: " + role.Role?.Arn);
+    this.log("Created IAM Role: " + role.Role.RoleName);
 
-    // Create the policy
-    const policy = {
-      Version: "2012-10-17",
-      Statement: [
-        {
-          Effect: "Allow",
-          Action: [
-            "logs:CreateLogGroup",
-            "logs:CreateLogStream",
-            "logs:DescribeLogStreams",
-            "logs:PutLogEvents",
+    // Get the policy
+    const existingPolicies = await iam.listPolicies({
+      PathPrefix: "/service-role/",
+    });
+    const POLICY_NAME = "cognito-import-policy";
+    let policy = existingPolicies.Policies?.find(
+      (p) => p.PolicyName === POLICY_NAME
+    );
+
+    // Create the policy if there isn't one
+    if (!policy) {
+      this.log("No IAM Policy found, creating one");
+      const createdPolicy = await iam.createPolicy({
+        PolicyName: POLICY_NAME,
+        Path: "/service-role/",
+        Description: "Policy for importing users into Cognito",
+        PolicyDocument: JSON.stringify({
+          Version: "2012-10-17",
+          Statement: [
+            {
+              Effect: "Allow",
+              Action: [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:DescribeLogStreams",
+                "logs:PutLogEvents",
+              ],
+              Resource: [
+                `arn:aws:logs:${process.env.AWS_REGION}:${accountId}:log-group:/aws/cognito/*`,
+              ],
+            },
           ],
-          Resource: [
-            `arn:aws:logs:${process.env.AWS_REGION}:${process.env.AWS_ACCOUNT_ID}:log-group:/aws/cognito/*`,
-          ],
-        },
-      ],
-    };
+        }),
+      });
+      policy = createdPolicy.Policy;
+      this.log("Create an IAM Policy: " + policy?.PolicyName);
+    }
 
     // Attach the policy inline to the role
-    await iam.putRolePolicy({
-      PolicyDocument: JSON.stringify(policy),
-      PolicyName: `cognito-import-${new Date().getTime()}`,
+    await iam.attachRolePolicy({
+      PolicyArn: policy?.Arn ?? "",
       RoleName: role.Role?.RoleName ?? "",
     });
     this.log("Attached policy to role");
 
-    this.iamArn = role.Role?.Arn ?? "";
+    this.iamArn = role.Role.Arn;
+    return this.iamArn;
   }
 }
 
