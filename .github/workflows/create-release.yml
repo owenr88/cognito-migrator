@@ -7,9 +7,19 @@ on:
       - "main"
 
 jobs:
+  build:
+    if: startsWith(github.head_ref, 'release/') &&  github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npm test
+
   create-release:
     if: startsWith(github.head_ref, 'release/') &&  github.event.pull_request.merged == true
-    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
