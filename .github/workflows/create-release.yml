@@ -20,6 +20,7 @@ jobs:
 
   create-release:
     if: startsWith(github.head_ref, 'release/') &&  github.event.pull_request.merged == true
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -34,15 +35,16 @@ jobs:
       - run: npm ci
 
       - name: Split branch name
+        id: split
         env:
           BRANCH: ${{ github.ref_name }}
-        id: split
-        run: echo "VERSION=${release##*/}" >> "$GITHUB_OUTPUT"
+        run: echo "VERSION=${BRANCH##*/}" >> "$GITHUB_OUTPUT"
 
       - name: "Set version"
         env:
           VERSION: ${{ steps.split.outputs.VERSION }}
-        run: npm pkg set version=$VERSION --workspaces
+        run: |
+          npm pkg set version=$VERSION --workspaces
 
       - name: Commit changes with the version
         uses: stefanzweifel/git-auto-commit-action@v5
