@@ -7,17 +7,6 @@ on:
       - "main"
 
 jobs:
-  build:
-    if: startsWith(github.head_ref, 'release/') &&  github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18
-      - run: npm ci
-      - run: npm test
-
   create-release:
     if: startsWith(github.head_ref, 'release/') &&  github.event.pull_request.merged == true
     needs: build
@@ -38,9 +27,12 @@ jobs:
         env:
           BRANCH: ${{ github.ref_name }}
         id: split
-        run: echo "::set-output name=version::${release##*/}"
+        run: echo "VERSION=${release##*/} >> "$GITHUB_OUTPUT"
 
-      - run: npm pkg set version=${{ steps.split.outputs.version }} --workspaces
+      - name: "Set version"
+        env:
+          VERSION: ${{ steps.split.outputs.VERSION }}
+        run: npm pkg set version=$VERSION --workspaces
 
       - name: Commit changes with the version
         uses: stefanzweifel/git-auto-commit-action@v5
@@ -53,7 +45,7 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          custom_tag: ${{ steps.split.outputs.version }}
+          custom_tag: ${{ steps.split.outputs.VERSION }}
 
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
