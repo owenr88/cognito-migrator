@@ -51,6 +51,7 @@ jobs:
         with:
           commit_message: "chore: tag and release"
           branch: main
+          push_options: --force
 
       - name: Bump version and push tag
         id: tag_version
