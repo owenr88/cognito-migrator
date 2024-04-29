@@ -40,7 +40,7 @@ jobs:
         id: split
         run: echo "::set-output name=version::${release##*/}"
 
-      - run: npm pkg set version=${{ steps.split.outputs.fragment }} --workspaces
+      - run: npm pkg set version=${{ steps.split.outputs.version }} --workspaces
 
       - name: Commit changes with the version
         uses: stefanzweifel/git-auto-commit-action@v5
@@ -53,7 +53,7 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          custom_tag: ${{ steps.split.outputs.fragment }}
+          custom_tag: ${{ steps.split.outputs.version }}
 
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
