@@ -1,0 +1,28 @@
+name: Create release and publish
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  publish-npm:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          registry-url: https://registry.npmjs.org/
+      - name: Clean install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Publish packages to NPM
+        run: npm run publish-all
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

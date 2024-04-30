@@ -1,4 +1,4 @@
-name: Create release
+name: Close PR and create release
 
 on:
   pull_request:
@@ -11,12 +11,16 @@ jobs:
     if: startsWith(github.head_ref, 'release/') &&  github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 18
-      - run: npm ci
-      - run: npm test
+      - name: Clean install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test
 
   create-release:
     if: startsWith(github.head_ref, 'release/') &&  github.event.pull_request.merged == true
@@ -25,41 +29,26 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 18
           registry-url: https://registry.npmjs.org/
-
-      - run: npm ci
-
+      - name: Clean install dependencies
+        run: npm ci
       - name: Split branch name
         id: split
         env:
           BRANCH: ${{ github.ref_name }}
         run: echo "VERSION=${BRANCH##*/}" >> "$GITHUB_OUTPUT"
-
-      - name: "Set version"
-        env:
-          VERSION: ${{ steps.split.outputs.VERSION }}
-        run: |
-          npm pkg set version=$VERSION --workspaces
-
-      - name: Commit changes with the version
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: tag and release"
-          branch: main
-          push_options: --force
-
-      - name: Bump version and push tag
+      - name: Tag latest release
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           custom_tag: ${{ steps.split.outputs.VERSION }}
-
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
         with:
