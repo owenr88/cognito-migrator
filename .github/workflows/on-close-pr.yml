@@ -7,7 +7,7 @@ on:
       - "main"
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -23,7 +23,7 @@ jobs:
 
   create-release:
     if: startsWith(github.head_ref, 'release/') &&  github.event.pull_request.merged == true
-    needs: build
+    needs: test
     runs-on: ubuntu-latest
     permissions:
       contents: write
