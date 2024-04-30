@@ -2,7 +2,7 @@ name: Open pull request, test and update versions
 
 on:
   pull_request:
-    types: [opened]
+    types: [opened, reopened]
 
 jobs:
   build:
