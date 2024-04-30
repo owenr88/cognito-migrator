@@ -1,0 +1,47 @@
+name: Open pull request, test and update versions
+
+on:
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ["16.x", "18.x"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Clean install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test
+
+  update-versions:
+    if: startsWith(github.head_ref, 'release/')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Split branch name
+        id: split
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: echo "VERSION=${BRANCH##*/}" >> "$GITHUB_OUTPUT"
+      - name: "Set version"
+        env:
+          VERSION: ${{ steps.split.outputs.VERSION }}
+        run: |
+          npm pkg set version=$VERSION --workspaces
+      - name: Commit changes with the version
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update package versions"
