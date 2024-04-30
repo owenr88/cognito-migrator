@@ -30,13 +30,14 @@ A full example of the CLI tool in effect can be found below:
 
 `npx cognito-import -u eu-west-1_aaaaaaaaa -p SOMEPROFILE -v -f ./users.csv`
 
-| Flag                              | Description                                                                                                                                            |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| -u, --user-pool-id <user-pool-id> | The ID of the AWS Cognito user pool to import into                                                                                                     |
-| -p, --profile PROFILEA            | The AWS profile to use for authentication. This will default to the AWS_PROFILE environment variable if left blank, or `default` if that is undefined. |
-| -f, --file ./users.csv            | The path to the CSV file to import. Defaults to `./users.csv`.                                                                                         |
-| -v, --verbose                     | Show all logs and errors in the console. Defaults to `true`.                                                                                           |
-| -h, --help                        | See all flags and options                                                                                                                              |
+| Flag                              | Description                                                                                                                                                       |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| -u, --user-pool-id <user-pool-id> | Required. The ID of the AWS Cognito user pool to import into                                                                                                      |
+| -p, --profile PROFILEA            | The AWS profile to use for authentication. This will default to the AWS_PROFILE environment variable if left blank, or `default` if that is undefined.            |
+| -f, --file ./users.csv            | The path to the CSV file to import. Defaults to `./users.csv`.                                                                                                    |
+| -i, --iam <iam-role-arn>          | An IAM Role ARN. If omitted, an IAM role will be created with the correct policy. Your access credentials will need permissions to create IAM roles and policies. |
+| -v, --verbose                     | Show all logs and errors in the console. Defaults to `true`.                                                                                                      |
+| -h, --help                        | See all flags and options                                                                                                                                         |
 
 ## 2. Node.js Example
 
@@ -73,9 +74,8 @@ const users = await cognitoExport({
   profile: "PROFILE_A",
 });
 
-await cognitoImport(users, {
-  jobId: "import-12345",
+const job = await cognitoImport(users, {
   userPoolId: "eu-west-2_bbbbbbbbb",
   profile: "PROFILE_B",
-}).start();
+});
 ```

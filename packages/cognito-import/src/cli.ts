@@ -24,8 +24,8 @@ const main = async () => {
       path.join(process.cwd(), `users.csv`)
     )
     .option(
-      "-i, --iam <iam-arn>",
-      "The arn for the IAM role. If left blank, one will be created."
+      "-i, --iam <iam-role-arn>",
+      "The arn for the IAM Role. If left blank, one will be created."
     )
     .option("-v, --verbose", "Show all log messages", false)
     .action(async () => {
