@@ -23,7 +23,7 @@ jobs:
         run: npm test
 
   update-versions:
-    if: startsWith(github.head_ref, 'release/') &&  github.event.pull_request.merged == true
+    if: startsWith(github.head_ref, 'release/')
     needs: build
     runs-on: ubuntu-latest
     permissions:
