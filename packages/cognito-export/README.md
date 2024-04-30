@@ -34,7 +34,7 @@ A full example of the CLI tool in effect can be found below:
 
 | Flag                              | Description                                                                                                                                            |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| -u, --user-pool-id <user-pool-id> | The ID of the AWS Cognito user pool to export from                                                                                                     |
+| -u, --user-pool-id <user-pool-id> | Required. The ID of the AWS Cognito user pool to export from                                                                                           |
 | -p, --profile PROFILEA            | The AWS profile to use for authentication. This will default to the AWS_PROFILE environment variable if left blank, or `default` if that is undefined. |
 | -o, --output ./users.csv          | The path to the output CSV file. Defaults to `./users.csv`.                                                                                            |
 | -l, --limit 1000                  | Limit the number of users outputted. Defaults to `1000`.                                                                                               |
@@ -54,7 +54,7 @@ const users = await cognitoExport({
 });
 ```
 
-> Please note: This method supports all flags documented above, **except** the output and verbose flags. Instead, the method just returns the user records to store somewhere.
+> Please note: This method supports all flags documented above, **except** the output and help flags. Instead, the method returns the type-safe user records.
 
 ## Use with [cognito-import](https://www.npmjs.com/package/cognito-import)
 

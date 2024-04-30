@@ -15,7 +15,7 @@ export const importCognito = async (
 ) => {
   const importer = new CognitoImport(options);
   await importer.connect();
-  await importer.import(users);
+  return importer.import(users);
 };
 
 export type {

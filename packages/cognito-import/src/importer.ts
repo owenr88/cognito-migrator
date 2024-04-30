@@ -1,3 +1,4 @@
+import { UserImportJobType } from "@aws-sdk/client-cognito-identity-provider";
 import fs from "fs";
 import fetch from "node-fetch";
 import Papa from "papaparse";
@@ -31,9 +32,12 @@ export class CognitoImport extends CognitoBase {
     }
   }
 
-  async import(users: ImportRecordSchemaType[]) {
+  async import(
+    users: ImportRecordSchemaType[]
+  ): Promise<UserImportJobType | undefined> {
     if (!users) {
-      return this.log("No users to import", "error");
+      this.log("No users to import", "error");
+      return;
     }
 
     // Create the job
@@ -73,5 +77,6 @@ export class CognitoImport extends CognitoBase {
       UserPoolId: this.userPoolId,
     });
     this.log("Started the import job for " + users.length + " users");
+    return job.UserImportJob;
   }
 }

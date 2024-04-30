@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    if: startsWith(github.head_ref, 'release/') &&  github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -40,7 +41,7 @@ jobs:
       - name: Split branch name
         id: split
         env:
-          BRANCH: ${{ github.ref_name }}
+          BRANCH: ${{ github.head_ref }}
         run: echo "VERSION=${BRANCH##*/}" >> "$GITHUB_OUTPUT"
       - name: Tag latest release
         id: tag_version
@@ -54,19 +55,8 @@ jobs:
           tag: ${{ steps.tag_version.outputs.new_tag }}
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
-
-      # - name: Create Release
-      #   id: create_release
-      #   uses: actions/create-release@latest
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-      #   with:
-      #     tag_name: $GITHUB_REF_NAME
-      #     release_name: $GITHUB_REF_NAME
-      #     # body: |
-      #     #   Changes in this Release
-      #     #   - First Change
-      #     #   - Second Change
-      #     draft: false
-      #     prerelease: false
-      # - run: git tag -fa $GITHUB_REF_NAME
+      - name: Delete branch
+        uses: dawidd6/action-delete-branch@v3
+        with:
+          github_token: ${{github.token}}
+          branches: ${{ github.head_ref }}
