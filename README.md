@@ -20,6 +20,8 @@ Run `npm run start` to watch all packages for local development.
 
 Please open an issue and create a pull request with any contributions.
 
+We generate the changelog using [Angular's git message conventions](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular).
+
 ## Release
 
-Create a new release in Github to automatically bump the package.json version and release to NPM. Too easy!
+Close a new release/x.x.x PR to release to NPM. Too easy!
