@@ -3,6 +3,7 @@ name: Create release and publish
 on:
   release:
     types: [published]
+    branches: [main]
 
 jobs:
   publish-npm:

@@ -1,7 +1,7 @@
 {
   "name": "zod-cognito",
   "description": "Zod schemas for AWS Cognito User Pools",
-  "version": "1.2.1",
+  "version": "1.2.4",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "repository": {

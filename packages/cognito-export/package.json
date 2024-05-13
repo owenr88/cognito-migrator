@@ -1,7 +1,7 @@
 {
   "name": "cognito-export",
   "description": "A simple CLI tool and JavaScript package for exporting users from an AWS Cognito user pool.",
-  "version": "1.2.1",
+  "version": "1.2.4",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": "dist/cli.js",
@@ -28,7 +28,7 @@
     "commander": "^12.0.0",
     "papaparse": "^5.4.1",
     "zod": "^3.23.8",
-    "zod-cognito": "^1.0.13"
+    "zod-cognito": "latest"
   },
   "devDependencies": {
     "@types/papaparse": "^5.3.14",

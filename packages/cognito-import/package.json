@@ -1,7 +1,7 @@
 {
   "name": "cognito-import",
   "description": "A simple CLI tool and JavaScript package for importing users into an AWS Cognito user pool.",
-  "version": "1.2.1",
+  "version": "1.2.4",
   "main": "dist/index.js",
   "bin": "dist/cli.js",
   "repository": {
@@ -31,7 +31,7 @@
     "commander": "^12.0.0",
     "node-fetch": "^2.7.0",
     "papaparse": "^5.4.1",
-    "zod-cognito": "^1.0.19"
+    "zod-cognito": "latest"
   },
   "devDependencies": {
     "@types/node-fetch": "^2.6.11",
