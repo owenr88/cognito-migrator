@@ -55,6 +55,7 @@ jobs:
         with:
           tag: ${{ steps.tag_version.outputs.new_tag }}
           name: Release ${{ steps.tag_version.outputs.new_tag }}
+          makeLatest: true
           body: ${{ steps.tag_version.outputs.changelog }}
       - name: Delete branch
         uses: dawidd6/action-delete-branch@v3
