@@ -57,6 +57,12 @@ jobs:
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           makeLatest: true
           body: ${{ steps.tag_version.outputs.changelog }}
+      - name: Build
+        run: npm run build
+      - name: Publish packages to NPM
+        run: npm run publish-all
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Delete branch
         uses: dawidd6/action-delete-branch@v3
         with:
