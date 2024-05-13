@@ -1,9 +1,11 @@
 import { ListUsersRequest } from "@aws-sdk/client-cognito-identity-provider";
 import * as fs from "fs";
 import Papa from "papaparse";
+import { z } from "zod";
 import {
   ImportRecordSchema,
   ImportRecordSchemaType,
+  extractCustomAttributeKeys,
   parseUserAttributes,
 } from "zod-cognito";
 import CognitoBase from "./CognitoBase";
@@ -30,8 +32,22 @@ export class CognitoExport extends CognitoBase {
         res?.Users?.forEach((user) => {
           if (users.length >= limit) return false;
 
+          // Convert the customAttributeKeys to an object
+          const customAttributeKeys = extractCustomAttributeKeys(
+            user.Attributes ?? []
+          );
+          const customAttr: Record<string, z.ZodType<string | number>> = {};
+          customAttributeKeys?.forEach((key) => {
+            customAttr[key] = z.union([z.string(), z.number()]);
+          });
+          customAttr.sub = z.string(); // Add this to exported data
+          const customAttributes = z.object(customAttr);
+
           // Map the attributes to a key-value object
-          const attrbs = parseUserAttributes(user.Attributes);
+          const attrbs = parseUserAttributes<typeof customAttr>(
+            user.Attributes,
+            customAttributes
+          );
 
           // Return if some core data isn't there
           if (!user.Username) {
@@ -54,12 +70,15 @@ export class CognitoExport extends CognitoBase {
             return false;
           }
 
+          // Delete the sub field from the export list
+          const { sub, ...attributesToExport } = attrbs;
+
           // Add the user to the list
           const newUser = ImportRecordSchema.safeParse({
             "cognito:username": user.Username,
             "cognito:mfa_enabled": false,
             updated_at: (user.UserLastModifiedDate ?? new Date()).toISOString(),
-            ...attrbs,
+            ...attributesToExport,
           });
           if (!newUser.success) {
             this.log(

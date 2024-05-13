@@ -4,15 +4,20 @@ import {
   ImportRecordSchema,
   ImportRecordSchemaType,
   RawImportRecordSchema,
-  UserAttributesSchema,
-  UserAttributesSchemaType,
+  RawUserAttributesSchema,
+  RawUserAttributesSchemaType,
+  extractCustomAttributeKeys,
   parseUserAttributes,
+  refineExtendedUserAttributesSchema,
 } from ".";
 
 describe("UserAttributesSchema", () => {
+  const RefinedUserAttributesSchema = refineExtendedUserAttributesSchema(
+    RawUserAttributesSchema
+  );
   it("should parse with email fields", () => {
     expect(
-      UserAttributesSchema.safeParse({
+      RefinedUserAttributesSchema.safeParse({
         sub: "test",
         email: "hello@test.com",
         email_verified: "true",
@@ -21,7 +26,7 @@ describe("UserAttributesSchema", () => {
   });
   it("should not parse email_verified without email", () => {
     expect(
-      UserAttributesSchema.safeParse({
+      RefinedUserAttributesSchema.safeParse({
         sub: "test",
         email: "",
         email_verified: "true",
@@ -30,7 +35,7 @@ describe("UserAttributesSchema", () => {
   });
   it("should not parse phone_number_verified without phone_number", () => {
     expect(
-      UserAttributesSchema.safeParse({
+      RefinedUserAttributesSchema.safeParse({
         sub: "test",
         phone_number: "",
         phone_number_verified: "true",
@@ -39,21 +44,12 @@ describe("UserAttributesSchema", () => {
   });
   it("should parse with phone_number fields", () => {
     expect(
-      UserAttributesSchema.safeParse({
+      RefinedUserAttributesSchema.safeParse({
         sub: "test",
         phone_number: "+1234567890",
         phone_number_verified: "true",
       }).success
     ).toBe(true);
-  });
-  it("should not parse without email or phone_number fields", () => {
-    expect(
-      UserAttributesSchema.safeParse({
-        sub: "test",
-        email_verified: "false",
-        phone_number_verified: "false",
-      }).success
-    ).toBe(false);
   });
 });
 
@@ -84,18 +80,39 @@ describe("parseUserAttributes", () => {
     expect(result.sub).toBe("test");
     expect(result.email).toBe("test@test.com");
     expect(result.email_verified).toBe(true);
-    // expect(result["custom:thing"]).toBe("test2");
+    // @ts-expect-error need to fix this
+    expect(result["custom:thing"]).toBe("test2");
+  });
+});
+
+describe("extractCustomAttributeKeys", () => {
+  it("should extract custom attributes", () => {
+    const keys = extractCustomAttributeKeys([
+      { Name: "sub", Value: "test" },
+      { Name: "email", Value: "test@test.com" },
+      { Name: "email_verified", Value: "true" },
+      { Name: "custom:thing_one", Value: "exampl" },
+    ]);
+    expect(keys).toHaveLength(1);
+    expect(keys[0]).toBe("custom:thing_one");
+  });
+  it("should not extract when there are no custom attributes", () => {
+    const keys = extractCustomAttributeKeys([
+      { Name: "sub", Value: "test" },
+      { Name: "email", Value: "test@test.com" },
+      { Name: "email_verified", Value: "true" },
+    ]);
+    expect(keys).toHaveLength(0);
   });
 });
 
 describe("ImportRecordSchema", () => {
   const birthdate = new Date(2024, 2, 20);
-  const baseUser: UserAttributesSchemaType &
+  const baseUser: Omit<RawUserAttributesSchemaType, "sub"> &
     Pick<
       ImportRecordSchemaType,
       "cognito:username" | "cognito:mfa_enabled" | "updated_at"
     > = {
-    sub: "test",
     "cognito:username": "test",
     name: "test",
     given_name: "test",
@@ -155,13 +172,6 @@ describe("ImportRecordSchema", () => {
     ).toBe(false);
   });
   it("should parse with email fields", () => {
-    console.log(
-      ImportRecordSchema.parse({
-        ...baseUser,
-        email: "hello@test.com",
-        email_verified: true,
-      })
-    );
     expect(
       ImportRecordSchema.safeParse({
         ...baseUser,
@@ -192,23 +202,14 @@ describe("ImportRecordSchema", () => {
     expect(
       ImportRecordSchema.safeParse({
         ...baseUser,
-        sub: "test",
         phone_number: "+1234567890",
         phone_number_verified: true,
       }).success
     ).toBe(true);
   });
-  it("should not parse without email or phone_number fields", () => {
-    expect(
-      ImportRecordSchema.safeParse({
-        ...baseUser,
-        email_verified: false,
-        phone_number_verified: false,
-      }).success
-    ).toBe(false);
-  });
   it("should have a valid birth date", () => {
     const result = ImportRecordSchema.parse(baseUser);
+    console.log("result", result);
     expect(result.birthdate).toBe("03/20/2024");
   });
 });

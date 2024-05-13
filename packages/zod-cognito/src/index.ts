@@ -11,65 +11,75 @@ const StringBoolean = z
   .default("false")
   .transform((val) => val === "true");
 
-export const UserAttributesSchema = z
-  .object({
-    sub: z.string(),
-    name: z.string().optional().default(""),
-    given_name: z.string().optional().default(""),
-    family_name: z.string().optional().default(""),
-    middle_name: z.string().optional().default(""),
-    nickname: z.string().optional().default(""),
-    preferred_username: z.string().optional().default(""),
-    profile: z.string().optional().default(""),
-    picture: z.string().optional().default(""),
-    website: z.string().optional().default(""),
-    gender: z.string().optional().default(""),
-    birthdate: z
-      .string()
-      .optional()
-      .transform((v) => {
-        if (!v) return v;
-        if (!isValid(new Date(v))) return "";
-        return new Date(v).toISOString();
-      })
-      .default(""),
-    zoneinfo: z.string().optional().default(""),
-    locale: z.string().optional().default(""),
-    address: z.string().optional().default(""),
-    email_verified: StringBoolean,
-    email: z.string().optional().default(""),
-    phone_number_verified: StringBoolean,
-    phone_number: z.string().optional().default(""),
-  })
-  .refine((schema) => {
-    if (!schema.email_verified && !schema.phone_number_verified) {
-      return false;
-    }
-    return true;
-  }, 'One of "email_verified" or "phone_number_verified" must be true')
-  .refine((schema) => {
-    if (schema.email_verified && !schema.email) {
-      return false;
-    }
-    return true;
-  }, 'If "email_verified" is true, "email" must be provided')
-  .refine((schema) => {
-    if (schema.phone_number_verified && !schema.phone_number) {
-      return false;
-    }
-    return true;
-  }, 'If "phone_number_verified" is true, "phone_number" must be provided');
-export type UserAttributesSchemaType = z.infer<typeof UserAttributesSchema>;
+export const RawUserAttributesSchema = z.object({
+  sub: z.string(),
+  name: z.string().optional().default(""),
+  given_name: z.string().optional().default(""),
+  family_name: z.string().optional().default(""),
+  middle_name: z.string().optional().default(""),
+  nickname: z.string().optional().default(""),
+  preferred_username: z.string().optional().default(""),
+  profile: z.string().optional().default(""),
+  picture: z.string().optional().default(""),
+  website: z.string().optional().default(""),
+  gender: z.string().optional().default(""),
+  birthdate: z
+    .string()
+    .optional()
+    .transform((v) => {
+      if (!v) return v;
+      if (!isValid(new Date(v))) return "";
+      return new Date(v).toISOString();
+    })
+    .default(""),
+  zoneinfo: z.string().optional().default(""),
+  locale: z.string().optional().default(""),
+  address: z.string().optional().default(""),
+  email_verified: StringBoolean,
+  email: z.string().optional().default(""),
+  phone_number_verified: StringBoolean,
+  phone_number: z.string().optional().default(""),
+});
+export type RawUserAttributesSchemaType = z.infer<
+  typeof RawUserAttributesSchema
+>;
+
+export const refineExtendedUserAttributesSchema = <
+  T extends typeof RawUserAttributesSchema = typeof RawUserAttributesSchema,
+>(
+  schema: T
+) =>
+  schema
+    // This is not always true - users can have neither verified
+    // .refine((schema) => {
+    //   if (!schema.email_verified && !schema.phone_number_verified) {
+    //     return false;
+    //   }
+    //   return true;
+    // }, 'One of "email_verified" or "phone_number_verified" must be true')
+    .refine((schema) => {
+      if (schema.email_verified && !schema.email) {
+        return false;
+      }
+      return true;
+    }, 'If "email_verified" is true, "email" must be provided')
+    .refine((schema) => {
+      if (schema.phone_number_verified && !schema.phone_number) {
+        return false;
+      }
+      return true;
+    }, 'If "phone_number_verified" is true, "phone_number" must be provided');
 
 export const parseUserAttributes = <
-  CustomAttributes extends z.ZodRawShape = { [k: string]: z.ZodString },
+  CustomAttributes extends Record<string, z.ZodType<string | number>> = {},
 >(
   attributes: AttributeType[] | undefined,
   customAttributes?: z.ZodObject<CustomAttributes>
-): z.infer<
-  typeof UserAttributesSchema & typeof z.ZodObject<CustomAttributes>
-> => {
-  const Schema = UserAttributesSchema.and(customAttributes ?? z.object({}));
+) => {
+  const merged = RawUserAttributesSchema.merge(
+    customAttributes ?? z.object({})
+  );
+  const Schema = refineExtendedUserAttributesSchema<any>(merged);
   return Schema.parse(
     attributes?.reduce(
       (acc, { Name, Value }) => {
@@ -79,6 +89,17 @@ export const parseUserAttributes = <
       {} as z.infer<typeof Schema>
     )
   );
+};
+
+export const extractCustomAttributeKeys = (
+  attributes: AttributeType[]
+): string[] => {
+  const keys: string[] = [];
+  attributes.forEach(({ Name, Value }) => {
+    if (!Name?.startsWith("custom:")) return;
+    keys.push(Name);
+  });
+  return keys;
 };
 
 /**
@@ -93,7 +114,7 @@ const zDefaultString = z
 /**
  * The attributes that can be imported into Cognito
  */
-export const RawImportRecordSchema = z.object({
+const schemaRawShape = {
   // Required
   "cognito:username": z.string(),
   "cognito:mfa_enabled": z.boolean(),
@@ -122,14 +143,32 @@ export const RawImportRecordSchema = z.object({
   email: zDefaultString,
   phone_number_verified: z.boolean(),
   phone_number: zDefaultString.transform((v) => (v ? parseInt(v) : "")),
-});
+} satisfies z.ZodRawShape;
+export const RawImportRecordSchema = z.object(schemaRawShape);
 
-export const ImportRecordSchema = RawImportRecordSchema.refine((schema) => {
-  if (!schema.email_verified && !schema.phone_number_verified) {
-    return false;
-  }
-  return true;
-}, 'One of "email_verified" or "phone_number_verified" must be true')
+export const ImportRecordSchema = RawImportRecordSchema.passthrough()
+  .refine((data) => {
+    // Allow custom attributes
+    const keys = Object.keys(schemaRawShape);
+    for (const key in data) {
+      // Pass for all existing keys
+      if (keys.includes(key)) continue;
+
+      // Pass if it starts with "custom:"
+      if (key.startsWith("custom:")) continue;
+
+      // Fail for other fields
+      return false;
+    }
+    return true;
+  }, "Some fields included are outside of the allowed schema")
+  // This is not always true - users can have neither verified
+  // .refine((schema) => {
+  //   if (!schema.email_verified && !schema.phone_number_verified) {
+  //     return false;
+  //   }
+  //   return true;
+  // }, 'One of "email_verified" or "phone_number_verified" must be true')
   .refine((schema) => {
     if (schema.email_verified && !schema.email) {
       return false;
