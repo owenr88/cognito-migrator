@@ -15,7 +15,7 @@ class CognitoBase {
   protected iamArn: string | undefined;
   protected userPoolId: string;
   protected cognito: CognitoIdentityProvider | undefined;
-  protected customAttributes: Record<string, z.ZodType<string | number>> = {}
+  protected customAttributes: Record<string, z.ZodType> = {};
 
   constructor(options: CognitoExportProps) {
     this.verbose = !!options.verbose;
@@ -89,7 +89,7 @@ class CognitoBase {
       userPool.UserPool?.SchemaAttributes?.forEach((attr) => {
         if (attr.Name && attr.Name.startsWith("custom:")) {
           // TODO: #24 We know the data type of the custom attribute, so we should validate against it
-          this.customAttributes[attr.Name] = z.union([z.string(), z.number()])
+          this.customAttributes[attr.Name] = z.union([z.string(), z.number()]).optional().default('');
         }
       });
       if(Object.keys(this.customAttributes).length) {

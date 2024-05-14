@@ -12,7 +12,7 @@ class CognitoBase {
   protected verbose: boolean;
   protected userPoolId: string;
   protected cognito: CognitoIdentityProvider | undefined;
-  protected customAttributes: Record<string, z.ZodType<string | number>> = {}
+  protected customAttributes: Record<string, z.ZodType> = {}
 
   constructor(options: CognitoExportProps) {
     this.verbose = !!options.verbose;
@@ -83,7 +83,7 @@ class CognitoBase {
       // Set the custom attributes
       userPool.UserPool?.SchemaAttributes?.forEach((attr) => {
         if (attr.Name && attr.Name.startsWith("custom:")) {
-          this.customAttributes[attr.Name] = z.union([z.string(), z.number()]);
+          this.customAttributes[attr.Name] = z.union([z.string(), z.number()]).optional().default("");
         }
       });
       if(Object.keys(this.customAttributes).length) {
