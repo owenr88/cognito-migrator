@@ -1,6 +1,7 @@
 import { CognitoIdentityProvider } from "@aws-sdk/client-cognito-identity-provider";
 import { IAM } from "@aws-sdk/client-iam";
 import chalk from "chalk";
+import { z } from "zod";
 
 type CognitoExportProps = {
   userPoolId: string;
@@ -14,6 +15,7 @@ class CognitoBase {
   protected iamArn: string | undefined;
   protected userPoolId: string;
   protected cognito: CognitoIdentityProvider | undefined;
+  protected customAttributes: Record<string, z.ZodType<string | number>> = {}
 
   constructor(options: CognitoExportProps) {
     this.verbose = !!options.verbose;
@@ -82,6 +84,16 @@ class CognitoBase {
         );
       }
       this.log("Found user pool " + userPool.UserPool?.Name);
+
+      // Set the custom attributes
+      userPool.UserPool?.SchemaAttributes?.forEach((attr) => {
+        if (attr.Name && attr.Name.startsWith("custom:")) {
+          this.customAttributes[attr.Name] = attr.AttributeDataType === "String" ? z.string() : z.number();
+        }
+      });
+      if(Object.keys(this.customAttributes).length) {
+        this.log('Extracted custom attributes: ' + Object.keys(this.customAttributes).join(','))
+      }
 
       // Create the iamArn if it doesn't exist
       if (!this.iamArn && !!userPool.UserPool?.Arn) {
