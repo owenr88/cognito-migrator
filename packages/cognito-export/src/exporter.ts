@@ -5,8 +5,7 @@ import { z } from "zod";
 import {
   ImportRecordSchema,
   ImportRecordSchemaType,
-  extractCustomAttributeKeys,
-  parseUserAttributes,
+  parseUserAttributes
 } from "zod-cognito";
 import CognitoBase from "./CognitoBase";
 
@@ -28,20 +27,16 @@ export class CognitoExport extends CognitoBase {
         // Get the users
         const res = await this.cognito?.listUsers(params);
 
+          // Add these to the pool custom attributes
+        const customAttr = {
+          ...this.customAttributes,
+          sub: z.string(),
+        }
+        const customAttributes = z.object(customAttr);
+
         // Loop through the users and parse them into the array
         res?.Users?.forEach((user) => {
           if (users.length >= limit) return false;
-
-          // Convert the customAttributeKeys to an object
-          const customAttributeKeys = extractCustomAttributeKeys(
-            user.Attributes ?? []
-          );
-          const customAttr: Record<string, z.ZodType<string | number>> = {};
-          customAttributeKeys?.forEach((key) => {
-            customAttr[key] = z.union([z.string(), z.number()]);
-          });
-          customAttr.sub = z.string(); // Add this to exported data
-          const customAttributes = z.object(customAttr);
 
           // Map the attributes to a key-value object
           const attrbs = parseUserAttributes<typeof customAttr>(
