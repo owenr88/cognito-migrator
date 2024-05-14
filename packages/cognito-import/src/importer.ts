@@ -23,6 +23,7 @@ export class CognitoImport extends CognitoBase {
       }).data;
 
       // Verify the contents
+      // TODO: #25 Validate the import schema with the custom attributes in the parent class
       const users = ImportSchema.parse(rawUsers);
 
       // Import the users
