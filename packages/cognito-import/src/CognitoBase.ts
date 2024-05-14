@@ -88,7 +88,8 @@ class CognitoBase {
       // Set the custom attributes
       userPool.UserPool?.SchemaAttributes?.forEach((attr) => {
         if (attr.Name && attr.Name.startsWith("custom:")) {
-          this.customAttributes[attr.Name] = attr.AttributeDataType === "String" ? z.string() : z.number();
+          // TODO: #24 We know the data type of the custom attribute, so we should validate against it
+          this.customAttributes[attr.Name] = z.union([z.string(), z.number()])
         }
       });
       if(Object.keys(this.customAttributes).length) {
