@@ -6,10 +6,15 @@ import z from "zod";
  * The attributes that can be exported from Cognito
  * */
 const StringBoolean = z
-  .union([z.literal("true"), z.literal("false")])
+  .union([
+    z.literal("True"),
+    z.literal("true"),
+    z.literal("False"),
+    z.literal("false"),
+  ])
   .optional()
   .default("false")
-  .transform((val) => val === "true");
+  .transform((val) => val.toLowerCase() === "true");
 
 export const RawUserAttributesSchema = z.object({
   sub: z.string(),
